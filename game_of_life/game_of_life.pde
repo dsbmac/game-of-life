@@ -11,22 +11,35 @@ final int NUM_ROWS = SCREEN_HEIGHT / CELL_SIZE;
 
 // globals
 int[][] world;
-ArrayList<int[]> spriteLocations;
+ArrayList<PVector> spriteLocations;
 
 // test
 int[][] seed = { {1, 1, 0, 0}, 
                  {1, 0, 0, 0},
-                 {0, 0, 0, 0}
-               };
+                 {0, 0, 0, 0} };
 
 void setup() {
   size(SCREEN_WIDTH, SCREEN_HEIGHT);
-  init_world(new int[SCREEN_WIDTH/CELL_SIZE][SCREEN_HEIGHT/CELL_SIZE]);
+  //init_world(new int[SCREEN_WIDTH/CELL_SIZE][SCREEN_HEIGHT/CELL_SIZE]);
+  init_world(seed);
 }
 
 void init_world(int[][] seed) {
   world = seed;
-  spriteLocations = new ArrayList<int[]>();
+  
+  // init spriteLocations and populate with seed locations
+  spriteLocations = new ArrayList<PVector>();
+  for (int row=0; row<world.length; row++) {
+    for (int col=0; col<world[row].length; col++) {
+      if (world[row][col] == 1) {
+        spriteLocations.add(new PVector(row, col));
+      }
+    }  
+  }
+  
+  print(spriteLocations);
+  print(seed[0][0]);
+  
 }
 
 // logic that update the cells alive or die state
@@ -37,16 +50,15 @@ int update_cell(int x) {
 // world update
 void update_world() {
   int[][] newWorld = new int[NUM_ROWS][NUM_COLS];
-  spriteLocations = newArrayList<int[]>();
+  spriteLocations = new ArrayList<PVector>();
   
   // update the world
   for (int row=0; row<world.length; row++) {
     for (int col=0; col<world[row].length; col++) {
-      newState = update_cell(world[row][col]);
+      int newState = update_cell(world[row][col]);
       newWorld[row][col] = newState;
       if (newState == ALIVE) {
-        int[] location = {row, col};
-        spriteLocations.add(location);        
+        spriteLocations.add(new PVector(row, col));        
       }
     }
   }
@@ -55,7 +67,13 @@ void update_world() {
 }
 
 void draw() {
-  update_world();
-}
   
+  //update_world();
+  for (int i=0; i<spriteLocations.size(); i++) {
+    PVector location = spriteLocations.get(i);
+    translate(location.x*CELL_SIZE,
+              location.y*CELL_SIZE);
+    fill(0);
+    rect(0, 0, CELL_SIZE, CELL_SIZE);
+  }
 }
