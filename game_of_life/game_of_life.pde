@@ -3,30 +3,34 @@
 // constants
 final int SCREEN_WIDTH = 800;
 final int SCREEN_HEIGHT = 600;
-final int CELL_SIZE = 200;
+final int CELL_SIZE = 100;
 final int ALIVE = 1;
 final int DEAD = 0;
 final int NUM_COLS = SCREEN_WIDTH / CELL_SIZE;
 final int NUM_ROWS = SCREEN_HEIGHT / CELL_SIZE;
 final color BACKGROUND_COLOR = color(100); 
+final int FRAME_RATE = 10;
 
 // globals
 int[][] world;
 ArrayList<PVector> spriteLocations; //using PVector to store row (y) col (x) info
 Boolean isGamePlaying;
+color[] palette;
 
-// test
-int[][] seed = { {0, 1, 0, 0}, 
-                 {0, 1, 0, 0},
-                 {0, 1, 0, 0} };
+// test seed
+int[][] debugSeed = { {0, 0, 0, 0, 0, 0, 0, 0}, 
+                      {0, 1, 1, 1, 1, 0, 0, 0},
+                      {0, 0, 0, 0, 0, 0, 0, 0},
+                      {0, 0, 0, 0, 0, 0, 0, 0},
+                      {0, 0, 0, 0, 0, 0, 0, 0},
+                      {0, 0, 0, 0, 0, 0, 0, 0} };
 
 void setup() {
   size(SCREEN_WIDTH, SCREEN_HEIGHT);
-  //init_world(new int[SCREEN_WIDTH/CELL_SIZE][SCREEN_HEIGHT/CELL_SIZE]);
-  init_world(seed);
-  
-  // debug
-  // noLoop();
+  frameRate(FRAME_RATE);
+  noStroke();
+  int[][] seed = debugSeed;
+  init_world(seed);  
 }
 
 void init_world(int[][] seed) {
@@ -55,10 +59,9 @@ void update_world() {
   for (int row=0; row<NUM_ROWS; row++) {
     for (int col=0; col<NUM_COLS; col++) {
       int newState = update_cell(row, col);
-      println("state/newState: " + world[row][col] + "/" + newState);
       newWorld[row][col] = newState;
       if (newState == ALIVE) {
-        spriteLocations.add(new PVector(row, col));        
+        spriteLocations.add(new PVector(col, row));        
       }
     }
   }
@@ -69,21 +72,20 @@ void update_world() {
 int update_cell(int row, int col) {
   int result;
   int aliveNeighbours = countAliveNeighbours(row, col);
-  println("row col aliveNeighbours: " + row + "," + col + " " + aliveNeighbours);
   
-  // evaluate live cell
+  // evaluate cell
   if (world[row][col] == ALIVE) {
     
     // Any live cell with fewer than two live neighbours dies, as if caused by under-population.
     if (aliveNeighbours < 2) {
       return 0;
-    } else if (aliveNeighbours == 2 || aliveNeighbours == 3) {
       
     // Any live cell with two or three live neighbours lives on to the next generation.
+    } else if (aliveNeighbours == 2 || aliveNeighbours == 3) {
       return 1;
-    } else {
       
-      // Any live cell with more than three live neighbours dies, as if by overcrowding.
+    // Any live cell with more than three live neighbours dies, as if by overcrowding.      
+    } else {
       return 0;
     }
   } else {
@@ -106,7 +108,6 @@ int countAliveNeighbours(int row, int col) {
     for (int j=-1; j<2; j++) {
       int newRow = row+i;
       int newCol = col+j;
-      println("newRow, newCol: " + newRow + "," + newCol);
       if (isInBounds(newRow, newCol)) {
         aliveNeighbours += world[newRow][newCol];
       }
@@ -120,6 +121,17 @@ Boolean isInBounds(int row, int col) {
  return row >= 0 && row < NUM_ROWS && col >= 0 && col < NUM_COLS;
 }
 
+int[][] createRandomSeed() {
+  int[][] seed = new int[NUM_ROWS][NUM_COLS];
+  for (int i=0; i<NUM_ROWS; i++) {
+    for (int j=0; j<NUM_COLS; j++) {
+      seed[i][j] = int(random(2));  
+    }      
+  }
+
+  return seed;  
+}
+
 void draw() {
   if (isGamePlaying) {
     background(BACKGROUND_COLOR);
@@ -131,8 +143,8 @@ void draw() {
     
     update_world();
     
-    // debug pause after each iteration
-    isGamePlaying = false;
+    // debug
+    //isGamePlaying = false;
   }
 }
 
